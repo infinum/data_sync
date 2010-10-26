@@ -2,7 +2,14 @@ namespace :db do
   desc "Refreshes your local development environment to the current production database"
   task :pull do
     `cap remote_db_runner`
-    `rake db:production_data_load`
+    `rake db:database_load`
+  end
+
+  desc "Refreshes your production database to the current local development database"
+  task :push do
+   `rake db:database_dump`
+   `cap local_db_upload`
+   `cap remote_db_restore`
   end
 
   desc "Dump the current database to a MySQL file"
@@ -49,9 +56,10 @@ namespace :db do
   end
 
   desc "Loads the production data downloaded into db/production_data into your local development database"
-  task :production_data_load => :environment do
-
+  task :database_load => :environment do
     databases = YAML::load(File.open(Rails.root.join('config', 'database.yml')))
+
+    database_folder = Rails.env == 'production' ? databases['development']['database'] : databases['production']['database']
 
     unless File.exists? Rails.root.join('db', 'production_data.tar.bz2')
       raise 'Unable to find database dump in db/production_data.tar.bz2'
@@ -84,8 +92,8 @@ namespace :db do
       when 'mongodb'
         commands = []
         commands << "cd #{Rails.root.join('db')}"
-        commands << "tar -xjf #{Rails.root.join('db', 'production_data.tar.bz2')}"
-        commands << "mongorestore --db #{databases[Rails.env]['database']} #{Rails.root.join('db', 'dump', databases['production']['database'])}"
+        commands << "tar -xjvf #{Rails.root.join('db', 'production_data.tar.bz2')}"
+        commands << "mongorestore --drop --db #{databases[Rails.env]['database']} #{Rails.root.join('db', 'dump', database_folder)}"
         commands << "rm -fr #{Rails.root.join('db', 'dump')} #{Rails.root.join('db', 'production_data.tar.bz2')}"
 
         `#{commands.join(' && ')}`
@@ -94,3 +102,4 @@ namespace :db do
     end
   end
 end
+
