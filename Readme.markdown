@@ -24,6 +24,10 @@ For pulling the database of the remote server
 
     rake db:pull
 
+For pushing the local database to the remote server
+
+    rake db:push
+
 For pulling the database and the files of the remote server
 
     rake data:pull
