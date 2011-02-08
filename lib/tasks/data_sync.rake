@@ -1,3 +1,4 @@
+# encoding: utf-8
 namespace :db do
   desc "Refreshes your local development environment to the current production database"
   task :pull do
@@ -16,42 +17,41 @@ namespace :db do
   task :database_dump => :environment do
     databases = YAML::load(File.open(Rails.root.join('config', 'database.yml')))
 
-    case databases[Rails.env]["adapter"]
-      when 'mysql'
-        ActiveRecord::Base.establish_connection(databases[Rails.env])
+    if (databases[Rails.env]["adapter"] == 'mysql' || databases[Rails.env]["adapter"] == 'mysql2')
+#      ActiveRecord::Base.establish_connection(databases[Rails.env])
 
-          commands = []
+      commands = []
 
-          mysql_dump_command = []
-          mysql_dump_command << "mysqldump"
-          mysql_dump_command << "-h #{databases[Rails.env]["host"]}"
-          mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
-          if databases[Rails.env]["password"].present?
-            mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
-          end
-          mysql_dump_command << "#{databases[Rails.env]["database"]}"
-          mysql_dump_command << " > #{Rails.root.join('db', 'production_data.sql')}"
+      mysql_dump_command = []
+      mysql_dump_command << "mysqldump"
+      mysql_dump_command << "-h #{databases[Rails.env]["host"].blank? ? 'localhost' : databases[Rails.env]["host"]}"
+      mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
+      if databases[Rails.env]["password"].present?
+        mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
+      end
+      mysql_dump_command << "#{databases[Rails.env]["database"]}"
+      mysql_dump_command << " > #{Rails.root.join('db', 'production_data.sql')}"
 
-          commands << mysql_dump_command.join(' ')
-          commands << "cd #{Rails.root.join('db')}"
-          commands << "tar -cjf #{Rails.root.join('db', 'production_data.tar.bz2')} production_data.sql"
-          commands << "rm -fr #{Rails.root.join('db', 'production_data.sql')}"
+      commands << mysql_dump_command.join(' ')
+      commands << "cd #{Rails.root.join('db')}"
+      commands << "tar -cjf #{Rails.root.join('db', 'production_data.tar.bz2')} production_data.sql"
+      commands << "rm -fr #{Rails.root.join('db', 'production_data.sql')}"
 
-          `#{commands.join(' && ')}`
-      when 'mongodb'
-        port = databases[Rails.env]['port']
-        port ||= 27017 # default mongodb port
+      `#{commands.join(' && ')}`
+    elsif databases[Rails.env]["adapter"] == 'mongodb'
+      port = databases[Rails.env]['port']
+      port ||= 27017 # default mongodb port
 
-        commands = []
-        commands << "rm -fr #{Rails.root.join('db', 'dump')}"
-        commands << "mongodump --host #{databases[Rails.env]['host']} --port #{port} --db #{databases[Rails.env]['database']} --out #{Rails.root.join('db', 'dump')}"
-        commands << "cd #{Rails.root.join('db')}"
-        commands << "tar -cjf #{Rails.root.join('db', 'production_data.tar.bz2')} dump/#{databases[Rails.env]['database']}"
-        commands << "rm -fr #{Rails.root.join('db', 'dump')}"
+      commands = []
+      commands << "rm -fr #{Rails.root.join('db', 'dump')}"
+      commands << "mongodump --host #{databases[Rails.env]['host']} --port #{port} --db #{databases[Rails.env]['database']} --out #{Rails.root.join('db', 'dump')}"
+      commands << "cd #{Rails.root.join('db')}"
+      commands << "tar -cjf #{Rails.root.join('db', 'production_data.tar.bz2')} dump/#{databases[Rails.env]['database']}"
+      commands << "rm -fr #{Rails.root.join('db', 'dump')}"
 
-        `#{commands.join(' && ')}`
-      else
-        raise "Task doesn't work with '#{databases[Rails.env]['adapter']}'"
+      `#{commands.join(' && ')}`
+    else
+      raise "Task doesn't work with '#{databases[Rails.env]['adapter']}'"
     end
   end
 
@@ -65,40 +65,38 @@ namespace :db do
       raise 'Unable to find database dump in db/production_data.tar.bz2'
     end
 
-    case databases[Rails.env]["adapter"]
-      when 'mysql'
-#        ActiveRecord::Base.establish_connection(databases[Rails.env])
+    if databases[Rails.env]["adapter"] == 'mysql' || databases[Rails.env]["adapter"] == 'mysql2'
+#     ActiveRecord::Base.establish_connection(databases[Rails.env])
+      commands = []
+      commands << "cd #{Rails.root.join('db')}"
+      commands << "tar -xjf #{Rails.root.join('db', 'production_data.tar.bz2')}"
 
-          commands = []
-          commands << "cd #{Rails.root.join('db')}"
-          commands << "tar -xjf #{Rails.root.join('db', 'production_data.tar.bz2')}"
+      mysql_dump_command = []
+      mysql_dump_command << "mysql"
+      if databases[Rails.env]["host"].present?
+        mysql_dump_command << "-h #{databases[Rails.env]["host"]}"
+      end
+      mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
+      if databases[Rails.env]["password"].present?
+        mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
+      end
+      mysql_dump_command << "#{databases[Rails.env]["database"]}"
+      mysql_dump_command << " < production_data.sql"
+      commands << mysql_dump_command.join(' ')
 
-          mysql_dump_command = []
-          mysql_dump_command << "mysql"
-          if databases[Rails.env]["host"].present?
-            mysql_dump_command << "-h #{databases[Rails.env]["host"]}"
-          end
-          mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
-          if databases[Rails.env]["password"].present?
-            mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
-          end
-          mysql_dump_command << "#{databases[Rails.env]["database"]}"
-          mysql_dump_command << " < production_data.sql"
-          commands << mysql_dump_command.join(' ')
+      commands << "rm -fr #{Rails.root.join('db', 'production_data.tar.bz2')} #{Rails.root.join('db', 'production_data.sql')}"
 
-          commands << "rm -fr #{Rails.root.join('db', 'production_data.tar.bz2')} #{Rails.root.join('db', 'production_data.sql')}"
+      `#{commands.join(' && ')}`
+    elsif databases[Rails.env]["adapter"] == 'mongodb'
+      commands = []
+      commands << "cd #{Rails.root.join('db')}"
+      commands << "tar -xjvf #{Rails.root.join('db', 'production_data.tar.bz2')}"
+      commands << "mongorestore --drop --db #{databases[Rails.env]['database']} #{Rails.root.join('db', 'dump', database_folder)}"
+      commands << "rm -fr #{Rails.root.join('db', 'dump')} #{Rails.root.join('db', 'production_data.tar.bz2')}"
 
-          `#{commands.join(' && ')}`
-      when 'mongodb'
-        commands = []
-        commands << "cd #{Rails.root.join('db')}"
-        commands << "tar -xjvf #{Rails.root.join('db', 'production_data.tar.bz2')}"
-        commands << "mongorestore --drop --db #{databases[Rails.env]['database']} #{Rails.root.join('db', 'dump', database_folder)}"
-        commands << "rm -fr #{Rails.root.join('db', 'dump')} #{Rails.root.join('db', 'production_data.tar.bz2')}"
-
-        `#{commands.join(' && ')}`
-      else
-        raise "Task not supported by '#{databases[Rails.env]['adapter']}'"
+      `#{commands.join(' && ')}`
+    else
+      raise "Task not supported by '#{databases[Rails.env]['adapter']}'"
     end
   end
 end
