@@ -2,7 +2,7 @@ desc 'Dumps the production database to db/production_data.sql on the remote serv
 task :remote_db_dump, :roles => :db, :only => { :primary => true } do
   commands = [
     "cd #{deploy_to}/#{current_dir}",
-    "rake RAILS_ENV=production db:database_dump --trace"
+    "bundle exec rake RAILS_ENV=production db:database_dump --trace"
   ]
 
   run commands.join(" && ")
@@ -12,7 +12,7 @@ desc 'Restores the database from db/production_data.sql on the remote server'
 task :remote_db_restore, :roles => :db, :only => { :primary => true } do
   commands = [
     "cd #{deploy_to}/#{current_dir}",
-    "rake RAILS_ENV=production db:database_load --trace"
+    "bundle exec rake RAILS_ENV=production db:database_load --trace"
   ]
 
   run commands.join(" && ")

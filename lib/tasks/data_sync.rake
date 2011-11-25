@@ -3,12 +3,12 @@ namespace :db do
   desc "Refreshes your local development environment to the current production database"
   task :pull do
     `cap remote_db_runner`
-    `rake db:database_load`
+    `bundle exec rake db:database_load`
   end
 
   desc "Refreshes your production database to the current local development database"
   task :push do
-   `rake db:database_dump`
+   `bundle exec rake db:database_dump`
    `cap local_db_upload`
    `cap remote_db_restore`
   end
