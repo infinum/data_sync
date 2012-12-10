@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.date        = '2012-12-10'
   s.summary     = "Data sync rake tasks."
   s.description = "Rake tasks to sync data between development and production environments (servers)."
-  s.authors     = ["Tomislav Car", "Nikica Kapraljević", "Josip Bišćan"]
+  s.authors     = ["Tomislav Car", "Nikola Kapraljević", "Josip Bišćan"]
   s.email       = ["tomislav@infinum.hr", "nikola@infinum.hr", "josip@infinum.hr"]
   s.homepage    = 'https://github.com/infinum/data_sync'
 
