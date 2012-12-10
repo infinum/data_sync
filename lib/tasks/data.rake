@@ -5,4 +5,3 @@ namespace :data do
     `cap download_files`
   end
 end
-

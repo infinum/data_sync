@@ -1,21 +1,24 @@
 Data sync
 =======
 
-Rails plugin for syncing production database and files to local development server.
-
-
-Install
-=======
-
-To install, just add Data sync to your `vendor/plugins` directory:
-
-    rails plugin install git://github.com/carr/data_sync.git
+Rails plugin for syncing database and files between production and local development server.
 
 Requirements
 ============
 
+ * Rails 3
  * Capistrano
- * add <tt>gem capistrano</tt> to your Gemfile
+
+Install
+=======
+
+To install this gem, add the gem to your Gemfile
+
+    gem 'data_sync'
+
+And then add this line to your Capfile
+
+    require 'data_sync_recipes'
 
 Usage
 =====

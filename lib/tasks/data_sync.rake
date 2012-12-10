@@ -18,17 +18,13 @@ namespace :db do
     databases = YAML::load(File.open(Rails.root.join('config', 'database.yml')))
 
     if (databases[Rails.env]["adapter"] == 'mysql' || databases[Rails.env]["adapter"] == 'mysql2')
-#      ActiveRecord::Base.establish_connection(databases[Rails.env])
-
       commands = []
 
       mysql_dump_command = []
       mysql_dump_command << "mysqldump"
       mysql_dump_command << "-h #{databases[Rails.env]["host"].blank? ? 'localhost' : databases[Rails.env]["host"]}"
       mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
-      if databases[Rails.env]["password"].present?
-        mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
-      end
+      mysql_dump_command << "-p#{databases[Rails.env]["password"]}" if databases[Rails.env]["password"].present?
       mysql_dump_command << "#{databases[Rails.env]["database"]}"
       mysql_dump_command << " > #{Rails.root.join('db', 'production_data.sql')}"
 
@@ -66,20 +62,15 @@ namespace :db do
     end
 
     if databases[Rails.env]["adapter"] == 'mysql' || databases[Rails.env]["adapter"] == 'mysql2'
-#     ActiveRecord::Base.establish_connection(databases[Rails.env])
       commands = []
       commands << "cd #{Rails.root.join('db')}"
       commands << "tar -xjf #{Rails.root.join('db', 'production_data.tar.bz2')}"
 
       mysql_dump_command = []
       mysql_dump_command << "mysql"
-      if databases[Rails.env]["host"].present?
-        mysql_dump_command << "-h #{databases[Rails.env]["host"]}"
-      end
+      mysql_dump_command << "-h #{databases[Rails.env]["host"]}" if databases[Rails.env]["host"].present?
       mysql_dump_command << "-u #{databases[Rails.env]["username"]}"
-      if databases[Rails.env]["password"].present?
-        mysql_dump_command << "-p#{databases[Rails.env]["password"]}"
-      end
+      mysql_dump_command << "-p#{databases[Rails.env]["password"]}" if databases[Rails.env]["password"].present?
       mysql_dump_command << "#{databases[Rails.env]["database"]}"
       mysql_dump_command << " < production_data.sql"
       commands << mysql_dump_command.join(' ')
@@ -100,4 +91,3 @@ namespace :db do
     end
   end
 end
-
