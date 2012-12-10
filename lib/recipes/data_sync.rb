@@ -21,7 +21,7 @@ Capistrano::Configuration.instance.load do
 
   desc 'Downloads db/production_data.tar.bz2 from the remote production environment to your local machine'
   task :remote_db_download, :roles => :db, :only => { :primary => true } do
-    execute_on_servers(options) do |servers|
+    execute_on_servers do |servers|
       self.sessions[servers.first].sftp.connect do |tsftp|
         tsftp.download! "#{deploy_to}/#{current_dir}/db/production_data.tar.bz2", "db/production_data.tar.bz2"
       end
@@ -30,7 +30,7 @@ Capistrano::Configuration.instance.load do
 
   desc 'Uploads db/production_data.tar.bz2 from local environment to your production machine'
   task :local_db_upload, :roles => :db, :only => { :primary => true } do
-    execute_on_servers(options) do |servers|
+    execute_on_servers do |servers|
       self.sessions[servers.first].sftp.connect do |tsftp|
         tsftp.upload! "db/production_data.tar.bz2", "#{deploy_to}/#{current_dir}/db/production_data.tar.bz2"
       end
