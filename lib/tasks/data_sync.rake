@@ -75,7 +75,7 @@ namespace :db do
       mysql_dump_command << " < production_data.sql"
       commands << mysql_dump_command.join(' ')
 
-      commands << "rm -fr #{Rails.root.join('db', 'production_data.tar.bz2')} #{Rails.root.join('db', 'production_data.sql')}"
+      commands << "rm -fr #{Rails.root.join('db', 'production_data.tar.bz2')}"
 
       `#{commands.join(' && ')}`
     elsif databases[Rails.env]["adapter"] == 'mongodb'
