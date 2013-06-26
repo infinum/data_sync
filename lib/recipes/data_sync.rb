@@ -52,7 +52,7 @@ Capistrano::Configuration.instance.load do
   desc "Downloads the files in public/system"
   task :download_files, :roles => :db, :only => { :primary => true } do
     `mkdir -p public/system`
-    execute_on_servers(options) do |servers|
+    execute_on_servers do |servers|
       logger.info "Pulling public/system via rsync"
       `rsync --delete -r #{user}@#{servers.first}:#{deploy_to}/#{current_dir}/public/system/* public/system`
     end
