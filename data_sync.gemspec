@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'data_sync'
-  s.version     = '1.0.1'
-  s.date        = '2012-12-10'
+  s.version     = '1.0.2'
+  s.date        = '2013-12-11'
   s.summary     = "Data sync rake tasks."
   s.description = "Rake tasks to sync data between development and production environments (servers)."
   s.authors     = ["Tomislav Car", "Nikola Kapraljević", "Josip Bišćan"]
